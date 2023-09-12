@@ -28,7 +28,7 @@ public class BookReview {
     private User user;
 
     @Column(name = "rating")
-    private int rating;
+    private Integer rating;
 
     @Column(name = "comment")
     private String comment;

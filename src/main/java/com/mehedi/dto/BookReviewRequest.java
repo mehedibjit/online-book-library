@@ -3,7 +3,7 @@ package com.mehedi.dto;
 public class BookReviewRequest {
 
     private Long userId;
-    private int rating;
+    private Integer rating;
     private String comment;
 
     // Constructors, getters, and setters
@@ -11,7 +11,7 @@ public class BookReviewRequest {
     public BookReviewRequest() {
     }
 
-    public BookReviewRequest(Long userId, int rating, String comment) {
+    public BookReviewRequest(Long userId, Integer rating, String comment) {
         this.userId = userId;
         this.rating = rating;
         this.comment = comment;
@@ -25,11 +25,11 @@ public class BookReviewRequest {
         this.userId = userId;
     }
 
-    public int getRating() {
+    public Integer getRating() {
         return rating;
     }
 
-    public void setRating(int rating) {
+    public void setRating(Integer rating) {
         this.rating = rating;
     }
 
