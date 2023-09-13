@@ -28,18 +28,13 @@ public class BookReservation {
     @JoinColumn(name = "user_id")
     private User user;
 
-    // Add a field for the reservation date
     @Column(name = "reservation_date")
     private LocalDate reservationDate;
 
-    // Add a field for the isNotified flag
     @Column(name = "is_notified")
     private boolean isNotified;
 
-    // Add a field for the reservation status
     @Enumerated(EnumType.STRING)
     @Column(name = "reservation_status")
     private ReservationStatus reservationStatus;
-
-    // Constructors, getters, and setters
 }

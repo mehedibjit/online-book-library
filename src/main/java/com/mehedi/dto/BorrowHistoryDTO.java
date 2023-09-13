@@ -12,6 +12,4 @@ public class BorrowHistoryDTO {
     private String bookTitle;
     private LocalDate dueDate;
     private LocalDate returnDate;
-
-    // Getters and setters
 }

@@ -38,10 +38,8 @@ public class BorrowService {
             throw new BookUnavailableException("Book is already borrowed.");
         }
 
-        // Set the book's availability status to BORROWED.
         book.setAvailabilityStatus(AvailabilityStatus.BORROWED);
 
-        // Create a new BookBorrow entry.
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
@@ -98,11 +96,9 @@ public class BorrowService {
         private BookRepository bookRepository;
 
         public List<BorrowHistoryDTO> getUserBorrowHistory(Long userId) {
-            // Retrieve the user by userId
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
-            // Retrieve the borrowing history for the user
             List<BookBorrow> borrowHistory = bookBorrowRepository.findByUser(user);
 
             // Convert the BookBorrow entities to BorrowHistoryDTO objects
@@ -120,7 +116,6 @@ public class BorrowService {
     }
 
     public List<BorrowHistoryDTO> getUserBorrowHistory(Long userId) {
-        // Retrieve the user by userId
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 

@@ -1,6 +1,5 @@
 package com.mehedi.controller;
 
-import com.mehedi.dto.BookWithUserDTO;
 import com.mehedi.entity.Book;
 import com.mehedi.exception.BookNotFoundException;
 import com.mehedi.service.BookService;
@@ -50,15 +49,6 @@ public class BookController {
         }
     }
 
-//    @GetMapping("/all")
-//    public ResponseEntity<?> getAllBooks() {
-//        try {
-//            List<Book> books = bookService.getAllBooks();
-//            return new ResponseEntity<>(books, HttpStatus.OK);
-//        } catch (Exception ex) {
-//            return new ResponseEntity<>("Failed to fetch books." + ex, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
     @GetMapping("/all")
     public ResponseEntity<?> getAllBooks() {
         try {
@@ -68,15 +58,5 @@ public class BookController {
             return new ResponseEntity<>("Failed to fetch books." + ex, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-//    @GetMapping("/all")
-//    public ResponseEntity<?> getAllBooks() {
-//        try {
-//            List<BookWithUserDTO> booksWithUser = bookService.getAllBooksWithUserDetails();
-////            List<BookWithUserDTO> booksWithUser = bookService.getAllBooks();
-//            return new ResponseEntity<>(booksWithUser, HttpStatus.OK);
-//        } catch (Exception ex) {
-//            return new ResponseEntity<>("Failed to fetch books." + ex, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
 
 }

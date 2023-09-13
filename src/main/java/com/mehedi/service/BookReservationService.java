@@ -10,12 +10,7 @@ import com.mehedi.repository.BookRepository;
 import com.mehedi.repository.BookReservationRepository;
 import com.mehedi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -65,7 +60,6 @@ public class BookReservationService {
             throw new ErrorMessage("An user already reserved this book.");
         }
 
-        // Create a new reservation entry
         BookReservation reservation = new BookReservation();
         reservation.setBook(book);
         reservation.setUser(user);
@@ -116,70 +110,4 @@ public class BookReservationService {
         reservation.setReservationStatus(ReservationStatus.CANCELED);
         reservationRepository.save(reservation);
     }
-
-//    public void cancelReservation(Long bookId, Long userId) {
-//        // Find the reservation using Optional
-//        Optional<BookReservation> optionalReservation = reservationRepository.findByBookIdAndUserId(bookId, userId);
-//
-//        // Check if the reservation exists
-//        if (optionalReservation.isPresent()) {
-//            // Reservation found, proceed to delete it
-//            reservationRepository.delete(optionalReservation.get());
-//        } else {
-//            // Reservation not found, throw an exception
-//            throw new ReservationNotFoundException("Reservation not found for bookId: " + bookId);
-//        }
-//    }
-
-//    public void cancelReservation(Long bookId, Long userId) {
-//        // Check if the reservation exists for the given book and user
-//        BookReservation reservation = reservationRepository.findByBookAndUser(bookId, userId)
-//                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found for bookId: " + bookId));
-//
-//        // You can add additional checks if needed, e.g., checking reservation status, etc.
-//
-//        // Delete the reservation from the database
-//        reservationRepository.delete(reservation);
-//    }
-
-//    public void cancelReservation(Long bookId, Long userId) {
-//        // Find the reservation using Optional
-//        Optional<Book> optionalBook = bookRepository.findByBookId(bookId);
-//        Book book;
-//        if (optionalBook.isPresent()) {
-//            book = optionalBook.get();
-//        } else {
-//            // Reservation not found, throw an exception
-//            throw new ReservationNotFoundException("Reservation not found for bookId: " + bookId);
-//        }
-//
-//        Optional<User> optionalUser = userRepository.findByUserId(userId);
-//        User user;
-//        if (optionalUser.isPresent()) {
-//            user = optionalUser.get();
-//        } else {
-//            // Reservation not found, throw an exception
-//            throw new ReservationNotFoundException("Reservation not found for userId: " + userId);
-//        }
-//        Optional<BookReservation> optionalReservation = reservationRepository.findByUserAndBook(user, book);
-//
-//        // Check if the reservation exists
-//        if (optionalReservation.isPresent()) {
-//            // Reservation found, proceed to delete it
-//            reservationRepository.delete(optionalReservation.get());
-//        } else {
-//            // Reservation not found, throw an exception
-//            throw new ReservationNotFoundException("Reservation not found for bookId: " + bookId);
-//        }
-//    }
-
-//    public BookReservation findByReservationId(Long reservationId) {
-//        Optional<BookReservation> reservation = reservationRepository.findById(reservationId);
-//
-//        if (reservation.isEmpty()) {
-//            throw new ReservationNotFoundException("Reservation with ID " + reservationId + " not found.");
-//        }
-//
-//        return reservation.get();
-//    }
 }

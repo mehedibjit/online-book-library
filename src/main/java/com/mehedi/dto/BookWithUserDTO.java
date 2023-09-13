@@ -11,6 +11,4 @@ public class BookWithUserDTO {
         this.book = book;
         this.user = user;
     }
-
-    // Getter and setter methods for book and user...
 }
