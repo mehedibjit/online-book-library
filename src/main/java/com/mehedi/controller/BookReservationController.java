@@ -1,13 +1,18 @@
 package com.mehedi.controller;
 
 import com.mehedi.entity.BookReservation;
+import com.mehedi.entity.User;
 import com.mehedi.exception.BookReservationException;
 import com.mehedi.exception.ReservationNotFoundException;
 import com.mehedi.exception.UnauthorizedUserException;
+import com.mehedi.repository.UserRepository;
 import com.mehedi.service.BookReservationService;
+import com.mehedi.service.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,25 +20,37 @@ import java.util.List;
 @RestController
 @RequestMapping("/books/{bookId}")
 public class BookReservationController {
-    private final BookReservationService reservationService;
+    @Autowired
+    private BookReservationService reservationService;
 
     @Autowired
-    public BookReservationController(BookReservationService reservationService) {
-        this.reservationService = reservationService;
-    }
+    private UserAuthService userAuthService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+//    @Autowired
+//    public BookReservationController(BookReservationService reservationService) {
+//        this.reservationService = reservationService;
+//    }
 
     @PostMapping("/reserve")
     public ResponseEntity<String> reserveBook(@PathVariable Long bookId) {
-        Long userId = 2L;
-        reservationService.reserveBook(bookId, userId);
+//        Long userId = 2L;
+//        Long userId = userAuthService.getUserId();
+//        reservationService.reserveBook(bookId, userId);
+        reservationService.reserveBook(bookId);
         return new ResponseEntity<>("Book reserved successfully.", HttpStatus.OK);
     }
 
     @DeleteMapping("/cancel-reservation")
     public ResponseEntity<?> cancelReservation(@PathVariable Long bookId) {
-        Long userId = 2L;
+//        Long userId = 2L;
+//        Long userId = userAuthService.getUserId();
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User user = userRepository.findByEmail(authentication.getName()).get();
         try {
-            reservationService.cancelReservation(bookId, userId);
+            reservationService.cancelReservation(bookId);
             return ResponseEntity.ok("Reservation canceled successfully.");
         } catch (ReservationNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reservation not found.");

@@ -2,12 +2,17 @@ package com.mehedi.service;
 import com.mehedi.constatnts.AvailabilityStatus;
 import com.mehedi.dto.BookWithUserDTO;
 import com.mehedi.entity.Book;
+import com.mehedi.entity.BookReservation;
 import com.mehedi.entity.User;
-import com.mehedi.exception.BookNotFoundException;
-import com.mehedi.exception.BookServiceException;
-import com.mehedi.exception.DuplicateBookException;
+import com.mehedi.exception.*;
 import com.mehedi.repository.BookRepository;
+import com.mehedi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,7 +24,23 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public Book createBook(Book book) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User userNow = userRepository.findByEmail(authentication.getName()).get();
+
+        
+
+        if (!authentication.getAuthorities().stream().anyMatch(r -> r.getAuthority().equals("ADMIN"))) {
+            throw new AccessDeniedException("Access is denied. You must have the 'ADMIN' role to create a book.");
+        }
+
+//        BookReservation reservation = bookRepository.findByBookAndUser(book, userNow)
+//                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with this book: " + bookId));
+
         if (book.getTitle() == "" || book.getAuthor() == "") {
             throw new IllegalArgumentException("Title and author cannot be null.");
         }
@@ -60,18 +81,6 @@ public class BookService {
             throw new BookServiceException("Failed to fetch books.", ex);
         }
     }
-
-//    public List<BookWithUserDTO> getAllBooksWithUserDetails() {
-//        List<Book> books = bookRepository.findAll();
-//        List<BookWithUserDTO> booksWithUser = new ArrayList<>();
-//
-//        for (Book book : books) {
-//            User user = book.getUser(); // Fetch the associated user
-//            booksWithUser.add(new BookWithUserDTO(book, user));
-//        }
-//
-//        return booksWithUser;
-//    }
 
     public Optional<Book> findBookById(Long bookId) {
         return bookRepository.findById(bookId);
