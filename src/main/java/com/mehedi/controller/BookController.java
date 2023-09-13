@@ -58,4 +58,5 @@ public class BookController {
             return new ResponseEntity<>("Failed to fetch books." + ex, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

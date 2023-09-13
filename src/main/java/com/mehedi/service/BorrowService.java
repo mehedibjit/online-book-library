@@ -1,17 +1,22 @@
 package com.mehedi.service;
 
 import com.mehedi.constatnts.AvailabilityStatus;
+import com.mehedi.dto.BorrowHistoryDTO;
 import com.mehedi.dto.BorrowRequest;
 import com.mehedi.entity.Book;
+import com.mehedi.entity.BookBorrow;
 import com.mehedi.entity.User;
 import com.mehedi.exception.*;
+import com.mehedi.repository.BookBorrowRepository;
 import com.mehedi.repository.BookRepository;
 import com.mehedi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class BorrowService {
@@ -21,6 +26,10 @@ public class BorrowService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private BookBorrowRepository bookBorrowRepository;
+
+    @Transactional
     public void borrowBook(Long bookId, Long userId, LocalDate dueDate) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + bookId));
@@ -29,59 +38,100 @@ public class BorrowService {
             throw new BookUnavailableException("Book is already borrowed.");
         }
 
-        // Set the book's availability status to BORROWED.
         book.setAvailabilityStatus(AvailabilityStatus.BORROWED);
 
-        // Set the due date based on the provided parameter.
-        book.setDueDate(dueDate);
-
-        // Associate the book with the user by updating the book's user_id field.
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
-        book.setUser(user);
 
-        // Save the updated book to the database.
+        BookBorrow bookBorrow = new BookBorrow();
+        bookBorrow.setUser(user);
+        bookBorrow.setBook(book);
+        bookBorrow.setBorrowDate(LocalDate.now());
+        bookBorrow.setDueDate(dueDate);
+        bookBorrow.setReturnDate(null);
+
         bookRepository.save(book);
+        bookBorrowRepository.save(bookBorrow);
     }
 
-//    public void returnBook(Long bookId) {
-//        Book book = bookRepository.findById(bookId)
-//                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + bookId));
-//
-//        if (book.getAvailabilityStatus() != AvailabilityStatus.BORROWED) {
-//            throw new ErrorMessage("Book is not currently borrowed.");
-//        }
-//
-//        // Update the book's availability status to AVAILABLE.
-//        book.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
-//
-//        // Remove the user association by setting the book's user to null.
-//        book.setUser(null);
-//
-//        // Save the updated book to the database.
-//        bookRepository.save(book);
-//    }
+
 
     public void returnBook(Long bookId, Long userId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + bookId));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
-
         if (!book.getAvailabilityStatus().equals(AvailabilityStatus.BORROWED)) {
             throw new BookReturnException("Book is not borrowed by the user.");
         }
 
-        // Set the book's availability status to AVAILABLE.
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        BookBorrow bookBorrow = bookBorrowRepository.findByBookAndUser(book, user);
+
+        if (bookBorrow == null) {
+            throw new BookReturnException("No borrow record found for this user and book.");
+        }
+
         book.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
 
-        // Remove the association between the book and the user.
         book.setUser(null);
 
-        book.setDueDate(null);
+        bookBorrow.setReturnDate(LocalDate.now());
 
-        // Save the updated book to the database.
         bookRepository.save(book);
+        bookBorrowRepository.save(bookBorrow);
+    }
+
+    @Service
+    public class BorrowBookService {
+
+        @Autowired
+        private BookBorrowRepository bookBorrowRepository;
+
+        @Autowired
+        private UserRepository userRepository;
+
+        @Autowired
+        private BookRepository bookRepository;
+
+        public List<BorrowHistoryDTO> getUserBorrowHistory(Long userId) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+            List<BookBorrow> borrowHistory = bookBorrowRepository.findByUser(user);
+
+            // Convert the BookBorrow entities to BorrowHistoryDTO objects
+            List<BorrowHistoryDTO> historyDTOList = new ArrayList<>();
+            for (BookBorrow borrow : borrowHistory) {
+                BorrowHistoryDTO historyDTO = new BorrowHistoryDTO();
+                historyDTO.setBookTitle(borrow.getBook().getTitle());
+                historyDTO.setDueDate(borrow.getDueDate());
+                historyDTO.setReturnDate(borrow.getReturnDate());
+                historyDTOList.add(historyDTO);
+            }
+
+            return historyDTOList;
+        }
+    }
+
+    public List<BorrowHistoryDTO> getUserBorrowHistory(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        // Retrieve the borrowing history for the user
+        List<BookBorrow> borrowHistory = bookBorrowRepository.findByUser(user);
+
+        // Convert the BookBorrow entities to BorrowHistoryDTO objects
+        List<BorrowHistoryDTO> historyDTOList = new ArrayList<>();
+        for (BookBorrow borrow : borrowHistory) {
+            BorrowHistoryDTO historyDTO = new BorrowHistoryDTO();
+            historyDTO.setBookTitle(borrow.getBook().getTitle());
+            historyDTO.setDueDate(borrow.getDueDate());
+            historyDTO.setReturnDate(borrow.getReturnDate());
+            historyDTOList.add(historyDTO);
+        }
+
+        return historyDTOList;
     }
 }

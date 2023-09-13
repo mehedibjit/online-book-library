@@ -21,14 +21,14 @@ public class BookReview {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id") // Name of the foreign key column in the BookReview table
-    private Book book; // This field references the Book entity
+    private Book book;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // Name of the foreign key column in the BookReview table
     private User user;
 
     @Column(name = "rating")
-    private int rating;
+    private Integer rating;
 
     @Column(name = "comment")
     private String comment;
