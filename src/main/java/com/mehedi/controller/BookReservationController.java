@@ -22,12 +22,6 @@ public class BookReservationController {
         this.reservationService = reservationService;
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<BookReservation>> getReservationsByBook(@PathVariable Long bookId) {
-//        List<BookReservation> reservations = reservationService.getReservationsByBook(bookId);
-//        return new ResponseEntity<>(reservations, HttpStatus.OK);
-//    }
-
     @PostMapping("/reserve")
     public ResponseEntity<String> reserveBook(@PathVariable Long bookId) {
         Long userId = 2L;
@@ -35,33 +29,20 @@ public class BookReservationController {
         return new ResponseEntity<>("Book reserved successfully.", HttpStatus.OK);
     }
 
-//    @DeleteMapping("/cancel-reservation")
-//    public ResponseEntity<?> cancelReservation(@PathVariable Long bookId) {
-//        Long userId = 2L;
-//        try {
-//            reservationService.cancelReservation(bookId, userId);
-//            return ResponseEntity.ok("Reservation canceled successfully.");
-//        } catch (ReservationNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reservation not found.");
-//        } catch (UnauthorizedUserException e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized to cancel this reservation.");
-//        } catch (BookReservationException e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to cancel reservation: " + e.getMessage());
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to cancel reservation.");
-//        }
-//    }
-
-//    @DeleteMapping("/cancel-reservation")
-//    public ResponseEntity<?> cancelReservation(@PathVariable Long bookId) {
-//        Long userId = 2L;
-//        try {
-//            bookReservationService.cancelReservation(bookId, userId);
-//            return ResponseEntity.ok("Reservation canceled successfully");
-//        } catch (ReservationNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reservation not found");
-//        } catch (BookReservationException e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to cancel reservation");
-//        }
-//    }
+    @DeleteMapping("/cancel-reservation")
+    public ResponseEntity<?> cancelReservation(@PathVariable Long bookId) {
+        Long userId = 2L;
+        try {
+            reservationService.cancelReservation(bookId, userId);
+            return ResponseEntity.ok("Reservation canceled successfully.");
+        } catch (ReservationNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reservation not found.");
+        } catch (UnauthorizedUserException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized to cancel this reservation.");
+        } catch (BookReservationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to cancel reservation: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to cancel reservation.");
+        }
+    }
 }

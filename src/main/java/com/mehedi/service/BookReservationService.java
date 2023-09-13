@@ -10,6 +10,7 @@ import com.mehedi.repository.BookRepository;
 import com.mehedi.repository.BookReservationRepository;
 import com.mehedi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -54,17 +55,14 @@ public class BookReservationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
-        // Check if the book is currently available
         if (book.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE) {
-            // Book is available, no need to reserve
-            return;
+            throw new ErrorMessage("The book is already available.");
         }
 
         // Check if the user has already reserved the same book
         List<BookReservation> existingReservations = reservationRepository.findByUserAndBook(user, book);
         if (!existingReservations.isEmpty()) {
-            // User already reserved this book
-            return;
+            throw new ErrorMessage("An user already reserved this book.");
         }
 
         // Create a new reservation entry
@@ -95,21 +93,29 @@ public class BookReservationService {
 //        }
 //    }
 
-//    public void cancelReservation(Long reservationId, Long userId) {
+    public void cancelReservation(Long bookId, Long userId) {
 //        BookReservation reservation = reservationRepository.findById(reservationId)
-//                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with id: " + reservationId));
-//
-//        if (!reservation.getUser().getUserId().equals(userId)) {
-//            throw new UnauthorizedUserException("You are not authorized to cancel this reservation.");
-//        }
-//
-//        if (reservation.getReservationStatus() == ReservationStatus.CANCELED) {
-//            throw new BookReservationException("The reservation is already canceled.");
-//        }
-//
-//        reservation.setReservationStatus(ReservationStatus.CANCELED);
-//        reservationRepository.save(reservation);
-//    }
+        Optional<Book> bookOptional = bookRepository.findByBookId(bookId);
+        Optional<User> userOptional = userRepository.findById(userId);
+        if(!bookOptional.isPresent()) {
+            throw new BookNotFoundException("This book is not found.");
+        }
+        Book book = bookOptional.get();
+        User user = userOptional.get();
+        BookReservation reservation = reservationRepository.findByBookAndUser(book, user)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with this book: " + bookId));
+
+        if (!reservation.getUser().getUserId().equals(userId)) {
+            throw new UnauthorizedUserException("You are not authorized to cancel this reservation.");
+        }
+
+        if (reservation.getReservationStatus() == ReservationStatus.CANCELED) {
+            throw new BookReservationException("The reservation is already canceled.");
+        }
+
+        reservation.setReservationStatus(ReservationStatus.CANCELED);
+        reservationRepository.save(reservation);
+    }
 
 //    public void cancelReservation(Long bookId, Long userId) {
 //        // Find the reservation using Optional
