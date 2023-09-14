@@ -8,8 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class LoginResponseDTO {
-//    private String email;
-//    private String bearerToken;
     private Long userId;
     private String email;
     private String AccessToken;

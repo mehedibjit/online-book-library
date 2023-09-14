@@ -38,9 +38,6 @@ public class BookService {
             throw new AccessDeniedException("Access is denied. You must have the 'ADMIN' role to create a book.");
         }
 
-//        BookReservation reservation = bookRepository.findByBookAndUser(book, userNow)
-//                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with this book: " + bookId));
-
         if (book.getTitle() == "" || book.getAuthor() == "") {
             throw new IllegalArgumentException("Title and author cannot be null.");
         }
