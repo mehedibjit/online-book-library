@@ -47,26 +47,27 @@ public class BookReservationService {
 
     public void reserveBook(Long bookId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(authentication.getName()).get();
+        User userNow = userRepository.findByEmail(authentication.getName()).get();
+
+        if(!userNow.getRole().equals(User.Role.CUSTOMER)) {
+            throw new UnauthorizedUserException("You are not Authorized");
+        }
+
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + bookId));
-
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
         if (book.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE) {
             throw new ErrorMessage("The book is already available.");
         }
 
-        // Check if the user has already reserved the same book
-        List<BookReservation> existingReservations = reservationRepository.findByUserAndBook(user, book);
+        List<BookReservation> existingReservations = reservationRepository.findByBookAndReservationStatus(book, ReservationStatus.CONFIRMED);
         if (!existingReservations.isEmpty()) {
             throw new ErrorMessage("An user already reserved this book.");
         }
 
         BookReservation reservation = new BookReservation();
         reservation.setBook(book);
-        reservation.setUser(user);
+        reservation.setUser(userNow);
         reservation.setReservationDate(LocalDate.now());
         reservation.setNotified(false);
         reservation.setReservationStatus(ReservationStatus.CONFIRMED);
@@ -92,29 +93,22 @@ public class BookReservationService {
 //    }
 
     public void cancelReservation(Long bookId) {
-//        BookReservation reservation = reservationRepository.findById(reservationId)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User userNow = userRepository.findByEmail(authentication.getName()).get();
 
+        if(!userNow.getRole().equals(User.Role.CUSTOMER)) {
+            throw new UnauthorizedUserException("You are not Authorized");
+        }
+
         Optional<Book> bookOptional = bookRepository.findByBookId(bookId);
-        Optional<User> userOptional = userRepository.findById(userNow.getUserId());
         if(!bookOptional.isPresent()) {
             throw new BookNotFoundException("This book is not found.");
         }
         Book book = bookOptional.get();
-        User user = userOptional.get();
-        BookReservation reservation = reservationRepository.findByBookAndUser(book, user)
+
+        BookReservation reservation = reservationRepository.findByBookAndUser(book, userNow)
                 .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with this book: " + bookId));
 
-        if (!reservation.getUser().getUserId().equals(userNow.getUserId())) {
-            throw new UnauthorizedUserException("You are not authorized to cancel this reservation.");
-        }
-
-        if (reservation.getReservationStatus() == ReservationStatus.CANCELED) {
-            throw new BookReservationException("The reservation is already canceled.");
-        }
-
-        reservation.setReservationStatus(ReservationStatus.CANCELED);
-        reservationRepository.save(reservation);
+        reservationRepository.delete(reservation);
     }
 }

@@ -29,16 +29,8 @@ public class BookReservationController {
     @Autowired
     private UserRepository userRepository;
 
-//    @Autowired
-//    public BookReservationController(BookReservationService reservationService) {
-//        this.reservationService = reservationService;
-//    }
-
     @PostMapping("/reserve")
     public ResponseEntity<String> reserveBook(@PathVariable Long bookId) {
-//        Long userId = 2L;
-//        Long userId = userAuthService.getUserId();
-//        reservationService.reserveBook(bookId, userId);
         reservationService.reserveBook(bookId);
         return new ResponseEntity<>("Book reserved successfully.", HttpStatus.OK);
     }
@@ -59,7 +51,7 @@ public class BookReservationController {
         } catch (BookReservationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to cancel reservation: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to cancel reservation.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to cancel reservation. " + e.getMessage());
         }
     }
 }

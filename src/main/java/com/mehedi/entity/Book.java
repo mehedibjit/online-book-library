@@ -36,4 +36,7 @@ public class Book {
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
+
+//    @Column(name = "deleted")
+//    private boolean deleted;
 }
