@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,6 +30,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager)
             throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->{
@@ -44,15 +46,16 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.DELETE,"/books/delete").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.GET,"books/all").authenticated()
 
+//                            .requestMatchers(HttpMethod.POST,"/books/{bookId}/borrow").hasAnyRole("CUSTOMER", "ADMIN")
                             .requestMatchers(HttpMethod.POST,"/books/{bookId}/borrow").hasRole("CUSTOMER")
                             .requestMatchers(HttpMethod.PUT,"/books/{bookId}/return").hasRole("CUSTOMER")
-                            .requestMatchers(HttpMethod.POST,"/books/{bookId}/reserve").hasRole("CUSTOMER")
-                            .requestMatchers(HttpMethod.PUT,"/books/{bookId}/cancel-reservation").hasRole("CUSTOMER")
+                            .requestMatchers(HttpMethod.POST,"/books/{bookId}/reserve").authenticated()
+                            .requestMatchers(HttpMethod.PUT,"/books/{bookId}/cancel-reservation").authenticated()
 
                             .requestMatchers(HttpMethod.GET,"/books/{bookId}/reviews").authenticated()
-                            .requestMatchers(HttpMethod.POST,"/books/{bookId}/reviews/create").hasRole("CUSTOMER")
-                            .requestMatchers(HttpMethod.PUT,"/books/{bookId}/reviews/{reviewId}/update").hasRole("CUSTOMER")
-                            .requestMatchers(HttpMethod.DELETE,"/books/{bookId}/reviews/{reviewId}/delete").hasRole("CUSTOMER")
+                            .requestMatchers(HttpMethod.POST,"/books/{bookId}/reviews/create").authenticated()
+                            .requestMatchers(HttpMethod.PUT,"/books/{bookId}/reviews/{reviewId}/update").authenticated()
+                            .requestMatchers(HttpMethod.DELETE,"/books/{bookId}/reviews/{reviewId}/delete").authenticated()
 
                             .requestMatchers(HttpMethod.GET,"/users/{userId}/history").authenticated()
                             .anyRequest().permitAll();

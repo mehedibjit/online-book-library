@@ -1,13 +1,14 @@
 package com.mehedi.service;
 import com.mehedi.constatnts.AvailabilityStatus;
-import com.mehedi.dto.BookWithUserDTO;
 import com.mehedi.entity.Book;
 import com.mehedi.entity.User;
-import com.mehedi.exception.BookNotFoundException;
-import com.mehedi.exception.BookServiceException;
-import com.mehedi.exception.DuplicateBookException;
+import com.mehedi.exception.*;
 import com.mehedi.repository.BookRepository;
+import com.mehedi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,12 +20,21 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public Book createBook(Book book) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User userNow = userRepository.findByEmail(authentication.getName()).get();
+
+        if(!userNow.getRole().equals(User.Role.ADMIN)) {
+            throw new UnauthorizedUserException("You are not Authorized");
+        }
+
         if (book.getTitle() == "" || book.getAuthor() == "") {
             throw new IllegalArgumentException("Title and author cannot be null.");
         }
 
-        // Check for duplicate book by title and author
         if(bookRepository.existsByTitleAndAuthor(book.getTitle(), book.getAuthor())) {
             throw new DuplicateBookException("A book with the same title and author already exists.");
         }
@@ -34,20 +44,32 @@ public class BookService {
     }
 
     public Book updateBook(Long bookId, Book updatedBook) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User userNow = userRepository.findByEmail(authentication.getName()).get();
+
+        if(!userNow.getRole().equals(User.Role.ADMIN)) {
+            throw new UnauthorizedUserException("You are not Authorized");
+        }
+
         Book existingBook = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + bookId));
 
-        // Update the properties of the existing book
         existingBook.setTitle(updatedBook.getTitle());
         existingBook.setAuthor(updatedBook.getAuthor());
-        existingBook.setAvailabilityStatus(updatedBook.getAvailabilityStatus());
+//        existingBook.setAvailabilityStatus(updatedBook.getAvailabilityStatus());
 //        existingBook.setDueDate(updatedBook.getDueDate());
 
-        // Save the updated book
         return bookRepository.save(existingBook);
     }
 
     public void deleteBook(Long bookId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User userNow = userRepository.findByEmail(authentication.getName()).get();
+
+        if(!userNow.getRole().equals(User.Role.ADMIN)) {
+            throw new UnauthorizedUserException("You are not Authorized");
+        }
+
         Book existingBook = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + bookId));
         bookRepository.delete(existingBook);
@@ -61,19 +83,20 @@ public class BookService {
         }
     }
 
-//    public List<BookWithUserDTO> getAllBooksWithUserDetails() {
-//        List<Book> books = bookRepository.findAll();
-//        List<BookWithUserDTO> booksWithUser = new ArrayList<>();
-//
-//        for (Book book : books) {
-//            User user = book.getUser(); // Fetch the associated user
-//            booksWithUser.add(new BookWithUserDTO(book, user));
-//        }
-//
-//        return booksWithUser;
-//    }
-
     public Optional<Book> findBookById(Long bookId) {
         return bookRepository.findById(bookId);
+    }
+
+    public List<Book> searchBooksByTitle(String title) {
+        try {
+            if (title == null || title.isEmpty()) {
+                throw new IllegalArgumentException("Title cannot be empty.");
+            }
+
+            List<Book> books = bookRepository.findByTitleStartingWithIgnoreCase(title);
+            return books;
+        } catch (Exception ex) {
+            throw new BookServiceException("Failed to search for books by title.", ex);
+        }
     }
 }

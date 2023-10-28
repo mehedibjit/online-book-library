@@ -30,8 +30,7 @@ public class BorrowController {
     @PostMapping("/{bookId}/borrow")
     public ResponseEntity<?> borrowBook(@PathVariable Long bookId, @RequestBody BorrowRequest borrowRequest) {
         try {
-            Long userId = 2L; //*****
-            borrowService.borrowBook(bookId, userId, borrowRequest.getDueDate());
+            borrowService.borrowBook(bookId, borrowRequest.getDueDate());
 
             return new ResponseEntity<>("Book borrowed successfully", HttpStatus.OK);
         } catch (Exception ex) {
