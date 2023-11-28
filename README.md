@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is an Online Book Library application, focusing on the backend development of RESTful APIs. The application provides various endpoints for user management, book management, book borrowing and returning, book reservations (optional), book reviews and ratings, and user history (optional). The REST endpoints are secured using Spring Security with role-based authentication, and MySQL is used as the database.
+This project is an Online Book Library application, focusing on the backend development of RESTful APIs. The application provides various endpoints for user management, book management, book borrowing and returning, book reservations, book reviews and ratings, and user history. The REST endpoints are secured using Spring Security with role-based authentication, and MySQL is used as the database.
 
 ## Features
 
@@ -84,7 +84,7 @@ This project is an Online Book Library application, focusing on the backend deve
   - Endpoint: `/books/{bookId}/reviews/{reviewId}/delete`
   - Description: Allow users (CUSTOMER) to delete their own review and rating for a book.
 
-### User History (Optional)
+### User History
 
 - **View Borrowing History**
   - Endpoint: `/users/{userId}/history`
